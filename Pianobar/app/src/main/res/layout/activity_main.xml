@@ -1,0 +1,174 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You are listening to:"
+        android:layout_marginTop="70dp"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/tvsong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tv1"
+        android:layout_below="@+id/tv1"
+        android:layout_marginTop="20dp"
+        android:text="Song:"/>
+
+    <TextView
+        android:id="@+id/tvartist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvsong"
+        android:layout_below="@+id/tvsong"
+        android:layout_marginTop="20dp"
+        android:text="Artist:"/>
+
+    <TextView
+        android:id="@+id/tvalbum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvartist"
+        android:layout_below="@+id/tvartist"
+        android:layout_marginTop="20dp"
+        android:text="Album:"/>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:max="100"
+        android:progress="0"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/song"
+        android:layout_above="@+id/tvartist" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/artist"
+        android:layout_alignBaseline="@+id/tvartist"
+        android:layout_alignBottom="@+id/tvartist"
+        android:layout_alignLeft="@+id/song"
+        android:layout_alignStart="@+id/song" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/album"
+        android:layout_alignBaseline="@+id/tvalbum"
+        android:layout_alignBottom="@+id/tvalbum"
+        android:layout_alignLeft="@+id/artist"
+        android:layout_alignStart="@+id/artist"
+        />
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="70dp"
+        android:layout_above="@+id/progressBar"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/relativeLayout">
+
+
+        <ImageButton
+            android:id="@+id/play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/play_bttn"
+            android:background="@null"
+            android:layout_marginRight="400dp"
+            android:layout_marginEnd="400dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <ImageButton
+            android:id="@+id/pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/pause_bttn"
+            android:background="@null"
+            android:layout_alignTop="@+id/play"
+            android:layout_toLeftOf="@+id/play"
+            android:layout_toStartOf="@+id/play"
+            android:layout_marginRight="30dp" />
+
+        <ImageButton
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/next_bttn"
+            android:layout_marginLeft="50dp"
+            android:layout_marginStart="50dp"
+            android:background="@null"
+            android:layout_centerVertical="true"
+            android:layout_alignLeft="@+id/play"
+            android:layout_alignStart="@+id/play" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="-0:00/0:00"
+            android:id="@+id/time"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:layout_alignParentRight="true">
+
+
+        <ListView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/stations"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/song"
+        android:layout_toEndOf="@+id/song"
+        android:background="#66FF33"
+        android:id="@+id/connected"></FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Connected"
+        android:id="@+id/tvconnected"
+        android:layout_alignBottom="@+id/connected"
+        android:layout_toRightOf="@+id/tvalbum"
+        android:layout_toEndOf="@+id/tvalbum" />
+
+
+</RelativeLayout>
