@@ -1,0 +1,31 @@
+package com.example.webview;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+
+	private TextView tv1;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		tv1 = (TextView) findViewById(R.id.tv1);
+		setContentView(R.layout.main);
+		
+		Bundle reciever = getIntent().getExtras();
+		String data = reciever.getString("info");
+		tv1.setText(tv1.getText() + "\n" + data);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.web_view, menu);
+		return true;
+	}
+	
+
+}

@@ -1,0 +1,29 @@
+package com.example.webview;
+
+import java.io.File;
+import java.util.Scanner;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+
+	private TextView tv1;
+	private WebView webView;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) throws FileNotFoundException {
+		super.onCreate(savedInstanceState);
+		tv1 = (TextView) findViewById(R.id.tv1);
+		webView = (WebView) findViewById(R.id.webView1);
+		setContentView(R.layout.main);
+		loadPages();
+	}
+	
+	public void loadPages() {
+		File f = new File("webSites.txt");
+		Scanner scan = new Scanner(f);
+	}
+}

@@ -1,0 +1,204 @@
+package com.example.webview;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.util.Log;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.TextView;
+
+public class WebViewActivity extends Activity {
+
+	private final int REDIRECT_COUNTDOWN_TIME = 15;
+	private final int WEBPAGE_MAX_TIME = 200;
+
+	private Queue<String> urls;
+	private ArrayList<Double> loadTimes;
+	private TextView tv1;
+	private WebView pageloader;
+
+	private long pageLoadStartTime;
+	private String currentUrl;
+	
+	private TriggerNextURL triggerNextURLReceiver;
+	private AlarmManager maxTimeCountDownAlarm;
+	private PendingIntent pendingPageCancel;
+	private PendingIntent pendingPageLoad;
+	private AlarmManager verificationCountDownAlarm;
+
+	private static int errorCode;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.webview);
+		urls = new LinkedList<String>();
+		loadQueue();
+		loadTimes = new ArrayList<Double>();
+		tv1 = (TextView) findViewById(R.id.tvLoadTimes);
+		pageloader = (WebView) findViewById(R.id.webview);
+
+		pageloader.getSettings().setJavaScriptEnabled(true);
+		pageloader.setWebViewClient(new CustomWebViewClient());
+		
+		Intent pageCancel = new Intent();
+		pageCancel.setAction(StopLoadingURL.PROCESS_RESPONSE);
+		pageCancel.addCategory(Intent.CATEGORY_DEFAULT);
+		maxTimeCountDownAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		pendingPageCancel = PendingIntent.getBroadcast(getApplicationContext(), 0, pageCancel, 0);
+		Intent pageLoad = new Intent();
+		pageLoad.setAction(TriggerNextURL.PROCESS_RESPONSE);
+		pageLoad.addCategory(Intent.CATEGORY_DEFAULT);
+		verificationCountDownAlarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		pendingPageLoad = PendingIntent.getBroadcast(getApplicationContext(), 0, pageLoad, 0);
+		
+		triggerNextURLReceiver = new TriggerNextURL();
+		IntentFilter filter = new IntentFilter(TriggerNextURL.PROCESS_RESPONSE);
+		filter.addCategory(Intent.CATEGORY_DEFAULT);
+		registerReceiver(triggerNextURLReceiver, filter);
+		
+		loadNextUrl();
+	}
+
+	public void loadQueue() {
+		Bundle intentBundle = getIntent().getExtras();
+		InputStream is = getResources().openRawResource(R.raw.test);
+		/*if(intentBundle.getBoolean("fileName")) {
+			is = getResources().openRawResource(R.raw.top200sites);
+		} else {
+			is = getResources().openRawResource(R.raw.other200sites);
+		}*/
+		Scanner input = new Scanner(is).useDelimiter("\\A");
+		while (input.hasNext()) {
+			String url = input.nextLine();
+			urls.add(url);
+		}
+	}	
+
+	public void loadNextUrl() {
+		if(!urls.isEmpty()){
+			currentUrl = urls.remove();
+			errorCode = 0;
+			pageloader.clearCache(true);
+			Log.i("loadNextUrl", "Loaded Url " + currentUrl);
+			pageloader.loadUrl("http://www." + currentUrl);
+			pageLoadStartTime = System.currentTimeMillis();
+			maxTimeCountDownAlarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + WEBPAGE_MAX_TIME * 1000, pendingPageCancel);
+			Log.i("Count Down: ", "In " + WEBPAGE_MAX_TIME + " seconds this page load will end if it's not done yet.");
+		}  else {
+			// used for graphing purposes so data is in sorted order
+			quickSort(loadTimes, 0, loadTimes.size() - 1);
+			writeData();
+		}
+	}
+
+	private double getTimeSince(long previousTime) {
+		long currTime = Calendar.getInstance().getTime().getTime();
+		double timeSince = ((double)((currTime - previousTime) / 100)) / 10;
+		return timeSince;
+	}
+
+	public class CustomWebViewClient extends WebViewClient {
+
+		@Override
+		public void onPageFinished(WebView view, String url) {
+			maxTimeCountDownAlarm.cancel(pendingPageCancel);
+			Log.i("onPageFinished", "onPageFinished was called for the url: " + url);
+			
+			Log.i("Count Down", "Waiting " + REDIRECT_COUNTDOWN_TIME + " seconds to load the next URL.");
+			verificationCountDownAlarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + REDIRECT_COUNTDOWN_TIME * 1000, pendingPageLoad);
+		}	
+		
+		@Override
+		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+			WebViewActivity.errorCode = errorCode;
+		}
+	}
+
+	public class TriggerNextURL extends BroadcastReceiver {
+		public static final String PROCESS_RESPONSE = "com.example.webview.pageLoad.action.triggerNextURL";
+
+		@Override
+		public void onReceive(Context context, Intent pageLoadService) {
+			double pageLoadTime = getTimeSince(pageLoadStartTime) - REDIRECT_COUNTDOWN_TIME;
+			loadTimes.add(pageLoadTime);
+			tv1.setText(tv1.getText() + "Page " + currentUrl + " loaded in " + pageLoadTime + " seconds : Error code = " + errorCode + "\n");
+			loadNextUrl();
+		}
+	}
+	
+	public class StopLoadingURL extends BroadcastReceiver {
+		public static final String PROCESS_RESPONSE = "com.example.webview.pageLoad.action.stopLoadingURL";
+		
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			errorCode = -1;
+			pageloader.stopLoading();
+			Log.i("URL Stopped", currentUrl);
+		}
+	}
+	
+	public int partition(ArrayList<Double> arr, int left, int right) {
+	      int i = left, j = right;
+	      double tmp;
+	      double pivot = arr.get((left + right) / 2);
+	     
+	      while (i <= j) {
+	            while (arr.get(i) < pivot)
+	                  i++;
+	            while (arr.get(j) > pivot)
+	                  j--;
+	            if (i <= j) {
+	                  tmp = arr.get(i);
+	                  arr.set(i, arr.get(j));
+	                  arr.set(j, tmp);
+	                  i++;
+	                  j--;
+	            }
+	      };
+	      return i;
+	}
+	 
+	public void quickSort(ArrayList<Double> arr, int left, int right) {
+	      int index = partition(arr, left, right);
+	      if (left < index - 1)
+	            quickSort(arr, left, index - 1);
+	      if (index < right)
+	            quickSort(arr, index, right);
+	}
+	
+	public void writeData(){
+		File f = new File(this.getFilesDir(), "webData.txt");
+		FileOutputStream output;
+		try {
+			output = openFileOutput("webData.txt", Context.MODE_PRIVATE);
+			for(Double d : loadTimes){
+				String s = d + "\n";
+				output.write(s.getBytes());
+			}
+			output.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		System.out.println("****Wrote to file****");
+	}
+}

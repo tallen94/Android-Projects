@@ -1,0 +1,50 @@
+package com.example.webview;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.widget.TextView;
+
+public class MainActivity extends Activity {
+
+	private TextView tv1;
+	private WebView webView;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		tv1 = (TextView) findViewById(R.id.tv1);
+		webView = (WebView) findViewById(R.id.webView1);
+		setContentView(R.layout.main);
+		try {
+			loadPages();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void loadPages() throws FileNotFoundException {
+		File f = new File("webSites.txt");
+		Scanner input = new Scanner(f);
+		
+		while(input.hasNextLine()) {
+			String url = input.nextLine();
+			long startTime;
+			long endTime;
+			
+			startTime = System.currentTimeMillis();
+			webView.loadUrl(url);
+			endTime = System.currentTimeMillis();
+			
+			String data = url + " : Load Time = " + (startTime - endTime);
+			
+			System.out.println(data);
+			
+		}
+	}
+}
